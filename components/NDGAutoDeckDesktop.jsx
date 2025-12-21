@@ -10,6 +10,7 @@ export default function NDGAutoDeckDesktop() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [crawlProgress, setCrawlProgress] = useState(0);
+  const [crawlWordIndex, setCrawlWordIndex] = useState(0); // V22.1: Flashlight karaoke
   const [readProgress, setReadProgress] = useState(0);
   const [logoSetIndex, setLogoSetIndex] = useState(0);
   const [logoFadeIn, setLogoFadeIn] = useState(true);
@@ -135,14 +136,19 @@ export default function NDGAutoDeckDesktop() {
 
   useEffect(() => {
     if (phase !== 'crawl') return;
-    const interval = setInterval(() => {
+    // V22.1: Dual timers - scroll progress + word highlight
+    const scrollInterval = setInterval(() => {
       setCrawlProgress(p => {
         const next = p + crawlContent.speed;
-        if (next >= crawlContent.transitionAt) { clearInterval(interval); setTimeout(() => setPhase('deck'), 500); return crawlContent.transitionAt; }
+        if (next >= crawlContent.transitionAt) { clearInterval(scrollInterval); setTimeout(() => setPhase('deck'), 300); return crawlContent.transitionAt; }
         return next;
       });
     }, 100);
-    return () => clearInterval(interval);
+    // Word-by-word flashlight - ~200 WPM = 300ms per word
+    const wordInterval = setInterval(() => {
+      setCrawlWordIndex(w => w + 1);
+    }, 300);
+    return () => { clearInterval(scrollInterval); clearInterval(wordInterval); };
   }, [phase]);
 
   useEffect(() => {
@@ -189,10 +195,46 @@ export default function NDGAutoDeckDesktop() {
     );
   }
 
-  // CRAWL
+  // CRAWL with Flashlight Karaoke
   if (phase === 'crawl') {
     const crawlTop = 100 - (crawlProgress * 3);
-    const crawlCss = `.crawl-wrap{position:fixed;inset:0;overflow:hidden}.crawl-wrap::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(5,18,36,1) 0%,rgba(5,18,36,0.7) 8%,rgba(5,18,36,0.3) 15%,transparent 25%,transparent 70%,rgba(5,18,36,0.2) 85%,rgba(5,18,36,0.6) 100%);pointer-events:none;z-index:10}.crawl-content{position:absolute;left:50%;transform:translateX(-50%);width:78%;max-width:950px;text-align:center}.crawl-h{font-family:'Cinzel',serif;font-size:2.6rem;color:#fbbf24;font-weight:700;letter-spacing:0.08em;margin-bottom:1.8rem}.crawl-p{font-family:'Cinzel',serif;font-size:1.7rem;font-weight:500;line-height:1.5;margin-bottom:1.2rem;letter-spacing:0.02em}.crawl-gold{color:#fbbf24}.crawl-white{color:#fff}.crawl-large{font-size:2.1rem;font-weight:700;margin-bottom:1.5rem}.crawl-italic{font-style:italic}`;
+    const crawlCss = `.crawl-wrap{position:fixed;inset:0;overflow:hidden}.crawl-wrap::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(5,18,36,1) 0%,rgba(5,18,36,0.7) 8%,rgba(5,18,36,0.3) 15%,transparent 25%,transparent 70%,rgba(5,18,36,0.2) 85%,rgba(5,18,36,0.6) 100%);pointer-events:none;z-index:10}.crawl-content{position:absolute;left:50%;transform:translateX(-50%);width:78%;max-width:950px;text-align:center}.crawl-h{font-family:'Cinzel',serif;font-size:2.6rem;color:#fbbf24;font-weight:700;letter-spacing:0.08em;margin-bottom:1.8rem}.crawl-p{font-family:'Cinzel',serif;font-size:1.7rem;font-weight:500;line-height:1.5;margin-bottom:1.2rem;letter-spacing:0.02em}.crawl-large{font-size:2.1rem;font-weight:700;margin-bottom:1.5rem}.crawl-italic{font-style:italic}.crawl-word{transition:all 0.15s ease;display:inline}.crawl-word-dim{color:rgba(139,105,20,0.6)}.crawl-word-lit{color:#ffffff;text-shadow:0 0 8px rgba(255,255,255,0.4)}.crawl-word-past{color:#fbbf24}`;
+    
+    // Build all words with their paragraph context
+    let globalWordIndex = 0;
+    const renderParagraph = (p, pIdx) => {
+      const words = p.text.split(' ');
+      const isWhite = p.style.includes('white');
+      const isLarge = p.style.includes('large');
+      const isItalic = p.style.includes('italic');
+      
+      const rendered = words.map((word, wIdx) => {
+        const thisWordIndex = globalWordIndex++;
+        const isLit = thisWordIndex === crawlWordIndex;
+        const isPast = thisWordIndex < crawlWordIndex;
+        
+        let className = 'crawl-word';
+        if (isLit) className += ' crawl-word-lit';
+        else if (isPast) className += ' crawl-word-past';
+        else className += ' crawl-word-dim';
+        
+        return (
+          <span key={wIdx} className={className} style={{ 
+            transform: isLit ? 'scale(1.05)' : 'scale(1)',
+            fontWeight: isLit ? 700 : undefined
+          }}>
+            {word}{wIdx < words.length - 1 ? ' ' : ''}
+          </span>
+        );
+      });
+      
+      return (
+        <p key={pIdx} className={`crawl-p ${isLarge ? 'crawl-large' : ''} ${isItalic ? 'crawl-italic' : ''}`}>
+          {rendered}
+        </p>
+      );
+    };
+    
     return (
       <div className="h-screen w-screen relative overflow-hidden" style={{ fontFamily: "'Cinzel', serif" }}>
         <style>{css + crawlCss}</style>
@@ -200,7 +242,7 @@ export default function NDGAutoDeckDesktop() {
         <div className="crawl-wrap">
           <div className="crawl-content" style={{ top: `${crawlTop}%` }}>
             <p className="crawl-h">{crawlContent.header}</p>
-            {crawlContent.paragraphs.map((p, i) => (<p key={i} className={`crawl-p ${p.style.includes('gold') ? 'crawl-gold' : 'crawl-white'} ${p.style.includes('large') ? 'crawl-large' : ''} ${p.style.includes('italic') ? 'crawl-italic' : ''}`}>{p.text}</p>))}
+            {crawlContent.paragraphs.map((p, i) => renderParagraph(p, i))}
             <p className="crawl-h" style={{ marginTop: '1.8rem' }}>{crawlContent.footer}</p>
           </div>
         </div>
@@ -264,7 +306,7 @@ export default function NDGAutoDeckDesktop() {
         const t = 3 + c.bullets.length;
         return (
           <div style={cont}>
-            <img src={images.socratesOrating} alt="" className="static-image" style={{ height: L.imgSmall, objectFit: 'contain', marginBottom: SP.el }} />
+            <img src={images.socratesOrating} alt="" className="static-image" style={{ height: L.imgMedium, objectFit: 'contain', marginBottom: SP.el }} />
             <h2 style={{ fontSize: F.slide, fontWeight: 800, letterSpacing: '0.05em' }}><RT text={c.title} idx={0} total={t} style={{ fontSize: F.slide, fontWeight: 800 }} isKeyEmphasis={true} /></h2>
             <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: F.bodyL }}><RTW text={c.definition} idx={1} total={t} /></p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: SP.box, width: '100%', maxWidth: '650px', marginTop: SP.tight }}>
@@ -386,21 +428,21 @@ export default function NDGAutoDeckDesktop() {
         const t = 8 + c.armorItems.length;
         let idx = 0;
         return (
-          <div style={cont}>
-            <img src={images.stMichael} alt="" className="static-image" style={{ height: L.imgLarge, objectFit: 'contain', marginBottom: SP.el }} />
+          <div style={{ ...cont, gap: '0.3rem' }}>
+            <img src={images.stMichael} alt="" className="static-image" style={{ height: '380px', objectFit: 'contain', marginBottom: '0.4rem' }} />
             <p style={{ fontSize: F.pre, fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase' }}><RTW text={c.pretitle} idx={idx++} total={t} brightColor={colors.blueLight} dimColor={colors.blueDim} /></p>
             <h2 style={{ fontSize: F.svc, fontWeight: 800, letterSpacing: '0.04em' }}><RT text={c.title} idx={idx++} total={t} style={{ fontSize: F.svc, fontWeight: 800 }} isKeyEmphasis={true} /></h2>
-            <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: F.body, fontStyle: 'italic' }}><RTW text={c.subtitle} idx={idx++} total={t} /></p>
-            <div style={{ width: '50px', height: '2px', background: colors.gold, margin: `${SP.tight} 0` }} />
-            <h3 style={{ fontSize: F.body, fontWeight: 800, letterSpacing: '0.05em' }}><RT text={c.armorTitle} idx={idx++} total={t} style={{ fontSize: F.body, fontWeight: 800 }} /></h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: SP.box, width: '100%', maxWidth: '700px', marginTop: SP.tight }}>
-              {c.armorItems.map((item, i) => <PB key={i} style={{ ...S.svcBox, maxWidth: '100%', padding: '0.6rem' }} idx={idx + i} total={t}>{item}</PB>)}
+            <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: F.bodyS, fontStyle: 'italic' }}><RTW text={c.subtitle} idx={idx++} total={t} /></p>
+            <div style={{ width: '40px', height: '2px', background: colors.gold, margin: '0.3rem 0' }} />
+            <h3 style={{ fontSize: F.bodyS, fontWeight: 800, letterSpacing: '0.05em' }}><RT text={c.armorTitle} idx={idx++} total={t} style={{ fontSize: F.bodyS, fontWeight: 800 }} /></h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.4rem', width: '100%', maxWidth: '700px', marginTop: '0.3rem' }}>
+              {c.armorItems.map((item, i) => <PB key={i} style={{ ...S.svcBox, maxWidth: '100%', padding: '0.5rem', fontSize: '1.1rem' }} idx={idx + i} total={t}>{item}</PB>)}
             </div>
             {(() => { idx += c.armorItems.length; return null; })()}
-            <blockquote style={{ ...S.scripture, marginTop: SP.el, maxWidth: '750px' }}><RTW text={c.scriptureQuote} idx={idx++} total={t} /></blockquote>
+            <blockquote style={{ ...S.scripture, marginTop: '0.5rem', maxWidth: '750px', padding: '0.7rem 1rem', fontSize: F.bodyS }}><RTW text={c.scriptureQuote} idx={idx++} total={t} /></blockquote>
             <p style={{ fontSize: F.attr, fontWeight: 700, letterSpacing: '0.12em' }}><RTW text={c.scriptureAttrib} idx={idx++} total={t} brightColor={colors.blueLight} dimColor={colors.blueDim} /></p>
-            <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: F.body, fontWeight: 600, marginTop: SP.tight }}><RT text={c.dharmaLink} idx={idx++} total={t} style={{ fontSize: F.body, fontWeight: 600 }} isKeyEmphasis={true} /></p>
-            <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: F.bodyL, fontWeight: 700, marginTop: SP.tight }}><RTW text={c.conclusion} idx={idx} total={t} /></p>
+            <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: F.bodyS, fontWeight: 600, marginTop: '0.3rem' }}><RT text={c.dharmaLink} idx={idx++} total={t} style={{ fontSize: F.bodyS, fontWeight: 600 }} isKeyEmphasis={true} /></p>
+            <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: F.body, fontWeight: 700, marginTop: '0.3rem' }}><RTW text={c.conclusion} idx={idx} total={t} /></p>
           </div>
         );
       }
@@ -408,15 +450,15 @@ export default function NDGAutoDeckDesktop() {
       case 'credentials': {
         const logos = logoSets[logoSetIndex];
         return (
-          <div style={{ ...cont, maxWidth: '1000px' }}>
+          <div style={{ ...cont, maxWidth: '1100px' }}>
             <p style={{ fontSize: F.pre, fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase' }}><RTW text={c.pretitle} idx={0} total={4} brightColor={colors.blueLight} dimColor={colors.blueDim} /></p>
             <h2 style={{ fontSize: F.slide, fontWeight: 800, letterSpacing: '0.05em' }}><RT text={c.title} idx={1} total={4} style={{ fontSize: F.slide, fontWeight: 800 }} /></h2>
-            <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: F.body, marginBottom: SP.tight }}><RTW text={c.credentialsIntro} idx={2} total={4} /></p>
+            <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: F.body, marginBottom: SP.tight, maxWidth: '900px' }}><RTW text={c.credentialsIntro} idx={2} total={4} /></p>
             <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: F.ndg, fontWeight: 600, fontStyle: 'italic', marginBottom: SP.el }}><RT text={c.credentialsSub} idx={3} total={4} style={{ fontSize: F.ndg, fontWeight: 600, fontStyle: 'italic' }} isKeyEmphasis={true} /></p>
-            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${L.logoCols}, 1fr)`, gap: '0.8rem', padding: '1rem', background: 'rgba(0,0,0,0.35)', borderRadius: '8px', width: '100%', maxWidth: L.logoMaxW, opacity: logoFadeIn ? 1 : 0, transition: 'opacity 0.3s ease' }}>
-              {logos.map((lg, i) => (<div key={i} className="logo-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.8rem', background: 'rgba(255,255,255,0.95)', borderRadius: '5px', height: L.logoH }}><img src={`/images/logos/${lg}`} alt="" style={{ maxWidth: '85%', maxHeight: '55px', objectFit: 'contain' }} /></div>))}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', padding: '1.2rem', background: 'rgba(0,0,0,0.4)', borderRadius: '10px', width: '100%', maxWidth: '950px', opacity: logoFadeIn ? 1 : 0, transition: 'opacity 0.3s ease' }}>
+              {logos.map((lg, i) => (<div key={i} className="logo-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', background: 'rgba(255,255,255,0.98)', borderRadius: '6px', height: '100px' }}><img src={`/images/logos/${lg}`} alt="" style={{ maxWidth: '90%', maxHeight: '70px', objectFit: 'contain' }} /></div>))}
             </div>
-            <div style={{ display: 'flex', gap: '0.3rem', marginTop: SP.tight }}>{logoSets.map((_, i) => <div key={i} style={{ width: i === logoSetIndex ? '14px' : '5px', height: '5px', borderRadius: '3px', background: i === logoSetIndex ? colors.gold : 'rgba(255,255,255,0.2)', transition: 'all 0.3s ease' }} />)}</div>
+            <div style={{ display: 'flex', gap: '0.4rem', marginTop: SP.el }}>{logoSets.map((_, i) => <div key={i} style={{ width: i === logoSetIndex ? '16px' : '6px', height: '6px', borderRadius: '3px', background: i === logoSetIndex ? colors.gold : 'rgba(255,255,255,0.25)', transition: 'all 0.3s ease' }} />)}</div>
           </div>
         );
       }
@@ -521,11 +563,11 @@ export default function NDGAutoDeckDesktop() {
     }
   };
 
-  // FOOTER CONTROLS
-  const cOp = controlsActive || isPaused ? 0.8 : 0.4;
-  const cCol = controlsActive || isPaused ? colors.gold : 'rgba(251,191,36,0.6)';
-  const btnS = { background: 'transparent', border: 'none', color: cCol, fontFamily: "'Cinzel', serif", fontSize: '14px', cursor: 'pointer', opacity: cOp, transition: 'all 0.3s ease', padding: '3px 6px' };
-  const arrS = { padding: '3px 9px', background: 'rgba(0,0,0,0.25)', border: `1px solid rgba(251,191,36,${cOp * 0.3})`, borderRadius: '3px', color: cCol, fontFamily: "'Cinzel', serif", fontSize: '10px', cursor: 'pointer', opacity: cOp, transition: 'all 0.3s ease' };
+  // FOOTER CONTROLS - V22.1: Brighter base opacity
+  const cOp = controlsActive || isPaused ? 0.95 : 0.65;
+  const cCol = controlsActive || isPaused ? colors.gold : 'rgba(251,191,36,0.8)';
+  const btnS = { background: 'transparent', border: 'none', color: cCol, fontFamily: "'Cinzel', serif", fontSize: '16px', cursor: 'pointer', opacity: cOp, transition: 'all 0.3s ease', padding: '4px 8px' };
+  const arrS = { padding: '4px 12px', background: 'rgba(0,0,0,0.35)', border: `1px solid rgba(251,191,36,${cOp * 0.5})`, borderRadius: '4px', color: cCol, fontFamily: "'Cinzel', serif", fontSize: '12px', cursor: 'pointer', opacity: cOp, transition: 'all 0.3s ease' };
 
   return (
     <div className="h-screen w-screen relative overflow-hidden" style={{ fontFamily: "'Cinzel', serif" }}>

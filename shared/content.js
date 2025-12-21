@@ -38,7 +38,7 @@ export const colors = {
   blueDim: '#1e40af',
 };
 
-// V22: Crawl unchanged
+// V22.1: Crawl with flashlight karaoke
 export const crawlContent = {
   header: 'IN THE ANNALS OF WISDOM...',
   paragraphs: [
@@ -49,14 +49,15 @@ export const crawlContent = {
     { text: 'Into this turning has emerged a different kind of force.', style: 'gold' },
     { text: 'Not politicians. Not prophets. Not rebels.', style: 'white' },
     { text: 'Something rarer: Practitioners of ancient wisdom, armed with modern capability.', style: 'gold' },
-    { text: 'They call it NOETIC DHARMA GROUP.', style: 'white-large' },
+    { text: 'They call themselves THE NOETIC DHARMA GROUP.', style: 'white-large' },
     { text: 'Their method is Socratic. Their execution, surgical. Their conviction, unwavering.', style: 'gold' },
     { text: 'They do not seek. They are sought. And they choose carefully.', style: 'white-large' },
     { text: 'This is their story...', style: 'white-italic' },
   ],
   footer: '★ ★ ★ ★',
-  speed: 0.18,
-  transitionAt: 100,
+  speed: 0.22,           // Slightly faster scroll
+  transitionAt: 95,      // Transition earlier to avoid blank screen
+  karaokeWPM: 200,       // Reading pace for flashlight effect
 };
 
 // V22: Enhanced timing for karaoke
@@ -193,7 +194,7 @@ export const slideDefinitions = [
       type: 'ai-revolution',
       pretitle: 'For the First Time in Human History',
       title: 'THE AI REVOLUTION',
-      text: 'A meta-technology that amplifies everything.',
+      text: 'Will change humanity in the next 5 years more than it has since humans occupied Earth.',
       impactItems: ['Our jobs', 'Our culture', 'Our meaning', 'Our relationships', 'Our creativity', 'Our truth'],
       amplified: 'Everything will be transformed.',
       contrastPairs: [['Opportunity', 'Risk'], ['Clarity', 'Confusion'], ['Power', 'Danger']],
@@ -276,10 +277,10 @@ export const slideDefinitions = [
       type: 'credentials',
       pretitle: 'The Foundation of Excellence',
       title: 'PROVEN AT THE HIGHEST LEVELS',
-      credentialsIntro: 'Our team has operated at the pinnacle of industry.',
-      credentialsSub: 'Over $200 billion in transactions. World-class execution.',
+      credentialsIntro: 'Our founders, stakeholders, advisors, and associates have been directly involved with the following organizations—',
+      credentialsSub: 'serving in management, investment banking, strategy, and marketing roles across $200+ billion in transactions.',
       logos: true,
-      keyEmphasis: ['$200 BILLION']
+      keyEmphasis: ['$200+ BILLION']
     }
   },
 
@@ -476,13 +477,17 @@ export const getSlideWordCount = (content) => {
 
 export const calcSlideDuration = (wordCount, slideId) => {
   // Special durations for specific slides
+  // V22.1: Adjusted durations - more time for text-heavy slides
   if (slideId === 'opener') return 10000;
   if (slideId === 'credentials') return 18000;
-  if (slideId === 'warriors-armor') return 15000;  // Complex merged slide
-  if (slideId === 'finale') return 15000;          // Complex merged finale
-  if (slideId === 'crisis-winter') return 12000;   // Merged crisis slide
-  if (slideId === 'ai-revolution') return 14000;   // Merged AI slide
-  if (slideId === 'selectivity-principles') return 12000; // Merged selectivity
+  if (slideId === 'warriors-armor') return 18000;  // Complex merged slide - was cutting off
+  if (slideId === 'finale') return 16000;          // Complex merged finale
+  if (slideId === 'crisis-winter') return 14000;   // Merged crisis slide - needs more time
+  if (slideId === 'ai-revolution') return 16000;   // Merged AI slide - longer text now
+  if (slideId === 'ai-wisdom') return 12000;       // "Window measured in months" - was too fast
+  if (slideId === 'selectivity-principles') return 14000; // Merged selectivity
+  if (slideId === 'method') return 10000;          // Socratic method - was too fast
+  if (slideId === 'transformation') return 10000;  // Fourth Turning - was too fast
   
   return Math.max(wordCount * msPerWord + timing.absorptionPauseMs, timing.minSlideDurationMs);
 };
@@ -525,14 +530,16 @@ export const baseAnimations = `
   }
 `;
 
-// V22: NO glow filters on images - just drop shadow for depth
+// V22.1: Softened image edges - feathered shadows to reduce "cut-out" look
 export const imageClasses = `
   .floating-image {
     animation: float 7s ease-in-out infinite;
-    filter: drop-shadow(0 8px 20px rgba(0,0,0,0.5));
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)) drop-shadow(0 8px 25px rgba(0,0,0,0.4));
+    border-radius: 2px;
   }
   .static-image {
-    filter: drop-shadow(0 8px 20px rgba(0,0,0,0.5));
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)) drop-shadow(0 8px 25px rgba(0,0,0,0.4));
+    border-radius: 2px;
   }
   .logo-card {
     animation: logoFade 0.3s ease forwards;
