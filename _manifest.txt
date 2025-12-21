@@ -1,0 +1,105 @@
+═══════════════════════════════════════════════════════════════════════════════
+NDG-AutoDeck-V22-Complete_2025-Dec-21
+MANIFEST
+═══════════════════════════════════════════════════════════════════════════════
+
+Project: NDG AutoDeck V22
+Created: December 21, 2025
+Version: 22.0.0
+Author: Noetic Dharma Group, LLC
+
+═══════════════════════════════════════════════════════════════════════════════
+CONTENTS
+═══════════════════════════════════════════════════════════════════════════════
+
+/components/
+  NDGAutoDeckDesktop.jsx    - Desktop presentation component (22 slides)
+  NDGAutoDeckMobile.jsx     - Full responsive mobile component
+
+/shared/
+  content.js                - Consolidated 22-slide content, colors, timing
+
+/pages/
+  index.js                  - Main page with device detection
+  _app.js                   - Next.js app wrapper
+
+/styles/
+  globals.css               - Global styles with karaoke animations
+
+/public/images/
+  1279.jpg                  - Cosmic starry background (NEW)
+  1279.png                  - Backup background
+  socrates-epic.png         - Hero Socrates image
+  socrates-seated.png       - Seated Socrates
+  herocontemplating.png     - Contemplating Socrates
+  orating.png               - Orating Socrates
+  reading.png               - Reading Socrates
+  writing.png               - Writing Socrates
+  stmichael.png             - St. Michael the Archangel
+  thumbsup.png              - Happy Socrates finale
+
+/public/images/logos/
+  [35 logo PNG files for credentials slide]
+
+/public/fonts/
+  FatherGalaxy-Regular.otf  - Custom font
+
+Configuration Files:
+  package.json              - Dependencies (Next.js 14, React 18, Tailwind 3.3.5)
+  tailwind.config.js        - Tailwind configuration
+  postcss.config.js         - PostCSS configuration
+  next.config.js            - Next.js configuration
+
+═══════════════════════════════════════════════════════════════════════════════
+V22 CHANGES FROM V21
+═══════════════════════════════════════════════════════════════════════════════
+
+1. SLIDE CONSOLIDATION: 30 slides → 22 slides
+   - Slide 5: Crisis + Winter merged
+   - Slide 7: AI Revolution + Contrast pairs merged
+   - Slide 8: AI Wisdom + Convergence equation merged
+   - Slide 10: Warriors + Armor + Scripture merged
+   - Slide 20: Selectivity + Principles merged
+   - Slide 22: CTA + Finale merged
+
+2. KARAOKE ENHANCEMENTS:
+   - Opacity fade-in (0 → 1)
+   - Scale animation (0.95 → 1)
+   - Pulse effect on key emphasis words (WISDOM, WINTER IS HERE, etc.)
+   - Slower transitions (500ms) for smoother reveals
+
+3. IMAGE SIZES INCREASED:
+   - Hero: 320px → 400px
+   - Large (St. Michael): 380px → 450px
+   - Medium: 300px → 380px
+   - Small: 240px → 300px
+
+4. MOBILE: Full responsive version (was placeholder)
+   - Touch gesture navigation (swipe left/right)
+   - Scaled fonts (20-30% smaller)
+   - 2-column grids instead of 3-column
+   - Larger touch targets (44px minimum)
+   - 20% longer slide durations
+
+5. SERVICE SLIDES: Added "Powered by Socratic wisdom" tie-in
+
+6. TIMING: Enhanced absorption pauses (1500ms), faster logo cycling (2500ms)
+
+═══════════════════════════════════════════════════════════════════════════════
+DEPLOYMENT INSTRUCTIONS
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Extract ZIP to your project directory
+2. Run: npm install
+3. Run: npm run dev (development) or npm run build && npm start (production)
+4. For Vercel: Push to GitHub or drag-drop to Vercel dashboard
+
+═══════════════════════════════════════════════════════════════════════════════
+COPYRIGHT & CONFIDENTIALITY
+═══════════════════════════════════════════════════════════════════════════════
+
+© 2025 Noetic Dharma Group, LLC | www.noeticdharma.com
+CONFIDENTIAL & PROPRIETARY
+Unauthorized review, distribution, copying, or disclosure is strictly prohibited.
+
+═══════════════════════════════════════════════════════════════════════════════
