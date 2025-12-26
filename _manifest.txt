@@ -1,11 +1,11 @@
 ═══════════════════════════════════════════════════════════════════════════════
-NDG-AutoDeck-V22-Complete_2025-Dec-21
+NDG-AutoDeck-V23-Optimizations_2025-Dec-26
 MANIFEST
 ═══════════════════════════════════════════════════════════════════════════════
 
-Project: NDG AutoDeck V22
-Created: December 21, 2025
-Version: 22.0.0
+Project: NDG AutoDeck V23
+Created: December 26, 2025
+Version: 23.0.0
 Author: Noetic Dharma Group, LLC
 
 ═══════════════════════════════════════════════════════════════════════════════
@@ -13,21 +13,21 @@ CONTENTS
 ═══════════════════════════════════════════════════════════════════════════════
 
 /components/
-  NDGAutoDeckDesktop.jsx    - Desktop presentation component (22 slides)
-  NDGAutoDeckMobile.jsx     - Full responsive mobile component
+  NDGAutoDeckDesktop.jsx    - Desktop presentation component (V23)
+  NDGAutoDeckMobile.jsx     - Full responsive mobile component (V23)
 
 /shared/
-  content.js                - Consolidated 22-slide content, colors, timing
+  content.js                - Consolidated 22-slide content, colors, timing (V23)
 
 /pages/
   index.js                  - Main page with device detection
   _app.js                   - Next.js app wrapper
 
 /styles/
-  globals.css               - Global styles with karaoke animations
+  globals.css               - Global styles with karaoke animations (V23)
 
 /public/images/
-  1279.jpg                  - Cosmic starry background (NEW)
+  1279.jpg                  - Cosmic starry background
   1279.png                  - Backup background
   socrates-epic.png         - Hero Socrates image
   socrates-seated.png       - Seated Socrates
@@ -51,39 +51,63 @@ Configuration Files:
   next.config.js            - Next.js configuration
 
 ═══════════════════════════════════════════════════════════════════════════════
-V22 CHANGES FROM V21
+V23 CHANGES FROM V22 (OPTIMIZATIONS PER ANALYSIS)
 ═══════════════════════════════════════════════════════════════════════════════
 
-1. SLIDE CONSOLIDATION: 30 slides → 22 slides
-   - Slide 5: Crisis + Winter merged
-   - Slide 7: AI Revolution + Contrast pairs merged
-   - Slide 8: AI Wisdom + Convergence equation merged
-   - Slide 10: Warriors + Armor + Scripture merged
-   - Slide 20: Selectivity + Principles merged
-   - Slide 22: CTA + Finale merged
+1. MOBILE VIEW OPTIMIZATION:
+   - Increased minimum font sizes:
+     * body: 0.9rem → 1.1rem min
+     * bodyS: 0.9rem → 1rem min
+     * hero: 2.5rem → 3rem min
+     * main: 2rem → 2.5rem min
+   - Larger image sizes:
+     * imgHero: 250px → 300px
+     * imgLarge: 300px → 350px
+     * imgMedium: 260px → 300px
+     * imgSmall: 200px → 240px
+     * imgSeated: 180px → 220px
+   - Increased padding (0 1rem → 1rem 1.5rem) for breathing room
+   - Container now uses justifyContent: 'flex-start' (was 'center')
+   - Added overflowY: 'auto' for scrolling on long content slides
 
-2. KARAOKE ENHANCEMENTS:
-   - Opacity fade-in (0 → 1)
-   - Scale animation (0.95 → 1)
-   - Pulse effect on key emphasis words (WISDOM, WINTER IS HERE, etc.)
-   - Slower transitions (500ms) for smoother reveals
+2. TEXT CRAWL ADJUSTMENTS:
+   - Slower scroll speed (0.22 → 0.18) for reading pace
+   - Reading pace adjusted (200 WPM → 180 WPM)
+   - Dynamic height calculation - crawl continues until content disappears
+   - Full transition (transitionAt: 95% → 100%)
+   - Word-by-word highlighting ADDED to mobile (was desktop-only)
+   - 500ms pause before advancing to deck phase
 
-3. IMAGE SIZES INCREASED:
-   - Hero: 320px → 400px
-   - Large (St. Michael): 380px → 450px
-   - Medium: 300px → 380px
-   - Small: 240px → 300px
+3. AESTHETICS ENHANCEMENTS:
+   - Brighter gold color (#fbbf24 → #ffd700)
+   - Added subtle text shadows for depth:
+     * mainT/slideT/svcT: 0 2px 4px rgba(0,0,0,0.3)
+     * body/pre/attr: 0 1px 2px rgba(0,0,0,0.2)
+   - Larger crawl fonts (desktop):
+     * crawl-h: 2.6rem → 3rem
+     * crawl-p: 1.7rem → 2rem
+     * crawl-large: 2.1rem → 2.5rem
+   - Larger crawl fonts (mobile):
+     * header: 1.5rem → 1.8rem
+     * paragraphs: 1rem → 1.1rem
+     * large: 1.2rem → 1.4rem
 
-4. MOBILE: Full responsive version (was placeholder)
-   - Touch gesture navigation (swipe left/right)
-   - Scaled fonts (20-30% smaller)
-   - 2-column grids instead of 3-column
-   - Larger touch targets (44px minimum)
-   - 20% longer slide durations
+4. IMAGE BIGGER IMPACT (Desktop):
+   - imgHero: 400px → 450px
+   - imgLarge: 450px → 500px
+   - imgMedium: 380px → 420px
+   - imgSmall: 300px → 340px
+   - imgSeated: 280px → 320px
 
-5. SERVICE SLIDES: Added "Powered by Socratic wisdom" tie-in
+5. CREDENTIALS SLIDE FIX (White Box Sizing):
+   - Changed grid to flexbox with wrap for auto-sizing
+   - Reduced logo box padding (1rem → 0.5rem desktop, 0.5rem → 0.4rem mobile)
+   - Boxes now hug logos more closely, eliminating "twice as big" issue
+   - Added minWidth/maxWidth constraints for consistent sizing
 
-6. TIMING: Enhanced absorption pauses (1500ms), faster logo cycling (2500ms)
+6. GLOBALS.CSS ENHANCEMENTS:
+   - Added mobile base font-size: 16px for visibility
+   - Added .crawl-content { width: 95% !important } for mobile
 
 ═══════════════════════════════════════════════════════════════════════════════
 DEPLOYMENT INSTRUCTIONS
@@ -93,6 +117,9 @@ DEPLOYMENT INSTRUCTIONS
 2. Run: npm install
 3. Run: npm run dev (development) or npm run build && npm start (production)
 4. For Vercel: Push to GitHub or drag-drop to Vercel dashboard
+
+Note: Next.js 14.0.0 has a security vulnerability. Consider upgrading to a 
+patched version after deployment.
 
 ═══════════════════════════════════════════════════════════════════════════════
 COPYRIGHT & CONFIDENTIALITY

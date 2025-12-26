@@ -1,5 +1,5 @@
 /* © 2025 Noetic Dharma Group, LLC | www.noeticdharma.com | CONFIDENTIAL & PROPRIETARY */
-/* NDG AutoDeck V22 - Global Styles */
+/* NDG AutoDeck V23 - Global Styles - Optimizations */
 
 @tailwind base;
 @tailwind components;
@@ -76,11 +76,19 @@ html, body {
     -webkit-overflow-scrolling: touch;
   }
   
+  body {
+    font-size: 16px;  /* V23: Base font boost for visibility */
+  }
+  
   * {
     -webkit-tap-highlight-color: transparent;
   }
   
   .floating-image {
     animation: float 8s ease-in-out infinite;
+  }
+  
+  .crawl-content {
+    width: 95% !important;  /* V23: Maximize width for bigger text impact */
   }
 }

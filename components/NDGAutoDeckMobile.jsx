@@ -1,7 +1,7 @@
 /* © 2025 Noetic Dharma Group, LLC | www.noeticdharma.com | CONFIDENTIAL & PROPRIETARY | Unauthorized use prohibited */
-/* NDG AutoDeck V22 - MOBILE */
+/* NDG AutoDeck V23 - MOBILE - Optimizations per analysis */
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { images, logoSets, colors, crawlContent, timing, buildSlides, baseAnimations, imageClasses } from '../shared/content';
 
 export default function NDGAutoDeckMobile() {
@@ -9,37 +9,50 @@ export default function NDGAutoDeckMobile() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [crawlProgress, setCrawlProgress] = useState(0);
+  const [crawlWordIndex, setCrawlWordIndex] = useState(0);  // V23: Word highlighting for mobile
   const [readProgress, setReadProgress] = useState(0);
   const [logoSetIndex, setLogoSetIndex] = useState(0);
   const [logoFadeIn, setLogoFadeIn] = useState(true);
   const [controlsActive, setControlsActive] = useState(false);
   const [touchStart, setTouchStart] = useState(null);
+  const crawlRef = useRef(null);  // V23: Ref for dynamic height calculation
 
   const slides = useMemo(() => buildSlides(), []);
 
+  // V23: LAYOUT - BIGGER IMAGES & INCREASED PADDING
   const L = {
-    footerH: '60px', topM: '10px', botM: '8px', maxW: '100%', pad: '0 1rem',
-    imgHero: '250px', imgLarge: '300px', imgMedium: '260px', imgSmall: '200px', imgSeated: '180px',
-    logoH: '60px', logoCols: 2, logoMaxW: '100%',
+    footerH: '60px', topM: '15px', botM: '10px', maxW: '100%', pad: '1rem 1.5rem',  // Increased padding for breathing room
+    imgHero: '300px', imgLarge: '350px', imgMedium: '300px', imgSmall: '240px', imgSeated: '220px',  // V23: Larger images
+    logoH: '70px', logoCols: 2, logoMaxW: '100%',
   };
 
+  // V23: FONTS - Increased minimum sizes for better readability
   const F = {
-    hero: 'clamp(2.5rem, 8vw, 3.5rem)', heroSub: '1.2rem', main: 'clamp(2rem, 6vw, 2.8rem)',
-    keyEmphasis: 'clamp(2.5rem, 8vw, 3.5rem)', slide: 'clamp(1.8rem, 5vw, 2.4rem)',
-    svc: 'clamp(1.5rem, 4vw, 2rem)', bodyL: 'clamp(1.1rem, 3.5vw, 1.4rem)',
-    body: 'clamp(1rem, 3vw, 1.2rem)', bodyS: 'clamp(0.9rem, 2.5vw, 1.1rem)',
-    quote: 'clamp(1rem, 3vw, 1.3rem)', pre: 'clamp(0.7rem, 2vw, 0.9rem)',
-    attr: 'clamp(0.7rem, 2vw, 0.85rem)', box: '0.9rem', ndg: 'clamp(1rem, 3vw, 1.3rem)',
+    hero: 'clamp(3rem, 9vw, 4rem)',  // Increased min/max for bolder hero text
+    heroSub: '1.4rem',
+    main: 'clamp(2.5rem, 7vw, 3.2rem)',
+    keyEmphasis: 'clamp(3rem, 9vw, 4rem)',
+    slide: 'clamp(2rem, 6vw, 2.8rem)',
+    svc: 'clamp(1.8rem, 5vw, 2.4rem)',
+    bodyL: 'clamp(1.3rem, 4vw, 1.6rem)',
+    body: 'clamp(1.1rem, 3.5vw, 1.4rem)',
+    bodyS: 'clamp(1rem, 3vw, 1.2rem)',
+    quote: 'clamp(1.2rem, 3.5vw, 1.5rem)',
+    pre: 'clamp(0.8rem, 2.5vw, 1rem)',
+    attr: 'clamp(0.8rem, 2.2vw, 0.95rem)',
+    box: '1rem',
+    ndg: 'clamp(1.2rem, 3.5vw, 1.5rem)',
   };
 
   const SP = { sec: '0.8rem', el: '0.5rem', box: '0.4rem', tight: '0.3rem' };
 
+  // V23: STYLES - Added subtle shadows for depth
   const S = {
-    mainT: { fontSize: F.main, fontWeight: 800, letterSpacing: '0.04em', color: colors.gold, textShadow: 'none' },
-    quote: { fontFamily: "'Cormorant Garamond', serif", fontSize: F.quote, fontStyle: 'italic', color: colors.gold, textShadow: 'none' },
-    scripture: { fontFamily: "'Cormorant Garamond', serif", fontSize: F.bodyS, fontStyle: 'italic', lineHeight: 1.6, color: colors.white, padding: '0.8rem 1rem', background: 'rgba(255,255,255,0.04)', borderRadius: '4px', textShadow: 'none' },
-    bodyL: { fontFamily: "'Cormorant Garamond', serif", fontSize: F.bodyL, lineHeight: 1.5, color: colors.white, textShadow: 'none' },
-    svcBox: { padding: '0.5rem 0.7rem', background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.35)', borderRadius: '4px', color: colors.gold, fontSize: F.box, fontWeight: 600, textAlign: 'center', textShadow: 'none' },
+    mainT: { fontSize: F.main, fontWeight: 800, letterSpacing: '0.04em', color: colors.gold, textShadow: '0 2px 4px rgba(0,0,0,0.3)' },
+    quote: { fontFamily: "'Cormorant Garamond', serif", fontSize: F.quote, fontStyle: 'italic', color: colors.gold, textShadow: '0 2px 4px rgba(0,0,0,0.3)' },
+    scripture: { fontFamily: "'Cormorant Garamond', serif", fontSize: F.bodyS, fontStyle: 'italic', lineHeight: 1.6, color: colors.white, padding: '0.8rem 1rem', background: 'rgba(255,255,255,0.04)', borderRadius: '4px', textShadow: '0 1px 2px rgba(0,0,0,0.2)' },
+    bodyL: { fontFamily: "'Cormorant Garamond', serif", fontSize: F.bodyL, lineHeight: 1.5, color: colors.white, textShadow: '0 1px 2px rgba(0,0,0,0.2)' },
+    svcBox: { padding: '0.5rem 0.7rem', background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.35)', borderRadius: '4px', color: colors.gold, fontSize: F.box, fontWeight: 600, textAlign: 'center', textShadow: '0 1px 2px rgba(0,0,0,0.2)' },
   };
 
   const mobileReadingMs = 600;
@@ -77,7 +90,42 @@ export default function NDGAutoDeckMobile() {
 
   useEffect(() => { if (phase !== 'deck') return; const sl = slides[currentSlide]; if (!sl || !sl.content.logos) { setLogoSetIndex(0); return; } setLogoSetIndex(0); setLogoFadeIn(true); const cycle = () => { setLogoFadeIn(false); setTimeout(() => { setLogoSetIndex(p => (p + 1) % logoSets.length); setLogoFadeIn(true); }, timing.logoFadeMs); }; const t = setInterval(cycle, timing.logoCycleMs); return () => clearInterval(t); }, [phase, currentSlide, slides]);
 
-  useEffect(() => { if (phase !== 'crawl') return; const interval = setInterval(() => { setCrawlProgress(p => { const next = p + crawlContent.speed; if (next >= crawlContent.transitionAt) { clearInterval(interval); setTimeout(() => setPhase('deck'), 500); return crawlContent.transitionAt; } return next; }); }, 100); return () => clearInterval(interval); }, [phase]);
+  // V23: Enhanced crawl with dynamic height calculation and word highlighting
+  useEffect(() => {
+    if (phase !== 'crawl') return;
+    
+    // Calculate total words for highlighting
+    const totalWords = crawlContent.paragraphs.reduce((acc, p) => acc + p.text.split(' ').length, 0) + crawlContent.header.split(' ').length;
+    const wordInterval = (60000 / crawlContent.karaokeWPM);
+    
+    // Word-by-word highlighting timer
+    const wordTimer = setInterval(() => {
+      setCrawlWordIndex(i => (i + 1) % (totalWords + 10)); // Loop with buffer
+    }, wordInterval);
+    
+    // Dynamic height-based scroll progress
+    const scrollInterval = setInterval(() => {
+      setCrawlProgress(p => {
+        const contentHeight = crawlRef.current?.getBoundingClientRect().height || 0;
+        const viewportHeight = window.innerHeight;
+        const maxProgress = contentHeight > 0 ? (contentHeight / viewportHeight) * 100 + 100 : crawlContent.transitionAt;
+        
+        const next = p + crawlContent.speed;
+        if (next >= maxProgress) {
+          clearInterval(scrollInterval);
+          clearInterval(wordTimer);
+          setTimeout(() => setPhase('deck'), 500);
+          return maxProgress;
+        }
+        return next;
+      });
+    }, 100);
+    
+    return () => {
+      clearInterval(scrollInterval);
+      clearInterval(wordTimer);
+    };
+  }, [phase]);
 
   useEffect(() => { if (phase !== 'deck' || isPaused) return; setReadProgress(0); const sl = slides[currentSlide]; if (!sl) { setPhase('end'); return; } const start = Date.now(); const dur = sl.duration * 1.2; const t = setInterval(() => { const prog = Math.min(((Date.now() - start) / dur) * 100, 100); setReadProgress(prog); if (prog >= 100) { clearInterval(t); setTimeout(() => { if (currentSlide < slides.length - 1) setCurrentSlide(p => p + 1); else setPhase('end'); }, timing.absorptionPauseMs); } }, 50); return () => clearInterval(t); }, [phase, currentSlide, isPaused, slides]);
 
@@ -91,7 +139,95 @@ export default function NDGAutoDeckMobile() {
 
   if (phase === 'crawl') {
     const crawlTop = 100 - (crawlProgress * 3);
-    return (<div className="h-screen w-screen relative overflow-hidden" style={{ fontFamily: "'Cinzel', serif" }}><style>{css}</style><BG /><div style={{ position: 'fixed', inset: 0, overflow: 'hidden' }}><div style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', width: '90%', textAlign: 'center', top: `${crawlTop}%` }}><p style={{ fontFamily: "'Cinzel', serif", fontSize: '1.5rem', color: colors.gold, fontWeight: 700, marginBottom: '1rem' }}>{crawlContent.header}</p>{crawlContent.paragraphs.map((p, i) => (<p key={i} style={{ fontFamily: "'Cinzel', serif", fontSize: p.style.includes('large') ? '1.2rem' : '1rem', color: p.style.includes('gold') ? colors.gold : colors.white, fontWeight: p.style.includes('large') ? 700 : 500, fontStyle: p.style.includes('italic') ? 'italic' : 'normal', marginBottom: '0.8rem' }}>{p.text}</p>))}</div></div><button onClick={() => { setPhase('deck'); setCurrentSlide(0); }} style={{ position: 'fixed', bottom: '15px', right: '15px', zIndex: 100, padding: '8px 16px', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(251,191,36,0.4)', color: '#fbbf24', fontFamily: "'Cinzel', serif", fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}>SKIP →</button><div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, height: '3px', background: 'rgba(0,0,0,0.3)', zIndex: 100 }}><div style={{ height: '100%', width: `${crawlProgress}%`, background: 'linear-gradient(90deg, #fbbf24, #fff, #fbbf24)' }} /></div></div>);
+    
+    // V23: Build words with highlighting similar to desktop
+    let globalWordIndex = 0;
+    const renderCrawlParagraph = (p, pIdx) => {
+      const words = p.text.split(' ');
+      const isLarge = p.style.includes('large');
+      const isItalic = p.style.includes('italic');
+      const isGold = p.style.includes('gold');
+      
+      const rendered = words.map((word, wIdx) => {
+        const thisWordIndex = globalWordIndex++;
+        const isLit = thisWordIndex === crawlWordIndex;
+        const isPast = thisWordIndex < crawlWordIndex;
+        
+        let wordColor = isGold ? colors.gold : colors.white;
+        if (!isLit && !isPast) wordColor = isGold ? 'rgba(139,105,20,0.6)' : 'rgba(255,255,255,0.4)';
+        if (isLit) wordColor = '#ffffff';
+        
+        return (
+          <span key={wIdx} style={{
+            color: wordColor,
+            textShadow: isLit ? '0 0 8px rgba(255,255,255,0.4)' : 'none',
+            transform: isLit ? 'scale(1.05)' : 'scale(1)',
+            fontWeight: isLit ? 700 : (isLarge ? 700 : 500),
+            transition: 'all 0.15s ease',
+            display: 'inline'
+          }}>
+            {word}{wIdx < words.length - 1 ? ' ' : ''}
+          </span>
+        );
+      });
+      
+      return (
+        <p key={pIdx} style={{
+          fontFamily: "'Cinzel', serif",
+          fontSize: isLarge ? '1.4rem' : '1.1rem',
+          fontStyle: isItalic ? 'italic' : 'normal',
+          marginBottom: '0.8rem',
+          lineHeight: 1.5
+        }}>
+          {rendered}
+        </p>
+      );
+    };
+    
+    // Render header words
+    const headerWords = crawlContent.header.split(' ');
+    const renderHeaderWords = () => {
+      return headerWords.map((word, wIdx) => {
+        const isLit = wIdx === crawlWordIndex;
+        const isPast = wIdx < crawlWordIndex;
+        
+        let wordColor = colors.gold;
+        if (!isLit && !isPast) wordColor = 'rgba(139,105,20,0.6)';
+        if (isLit) wordColor = '#ffffff';
+        
+        return (
+          <span key={wIdx} style={{
+            color: wordColor,
+            textShadow: isLit ? '0 0 8px rgba(255,255,255,0.4)' : 'none',
+            transform: isLit ? 'scale(1.05)' : 'scale(1)',
+            fontWeight: isLit ? 800 : 700,
+            transition: 'all 0.15s ease',
+            display: 'inline'
+          }}>
+            {word}{wIdx < headerWords.length - 1 ? ' ' : ''}
+          </span>
+        );
+      });
+    };
+    // Adjust globalWordIndex after header
+    globalWordIndex = headerWords.length;
+    
+    return (
+      <div className="h-screen w-screen relative overflow-hidden" style={{ fontFamily: "'Cinzel', serif" }}>
+        <style>{css}</style>
+        <BG />
+        <div style={{ position: 'fixed', inset: 0, overflow: 'hidden' }}>
+          <div ref={crawlRef} style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', width: '90%', textAlign: 'center', top: `${crawlTop}%` }}>
+            <p style={{ fontFamily: "'Cinzel', serif", fontSize: '1.8rem', color: colors.gold, fontWeight: 700, marginBottom: '1rem' }}>
+              {renderHeaderWords()}
+            </p>
+            {crawlContent.paragraphs.map((p, i) => renderCrawlParagraph(p, i))}
+          </div>
+        </div>
+        <button onClick={() => { setPhase('deck'); setCurrentSlide(0); }} style={{ position: 'fixed', bottom: '15px', right: '15px', zIndex: 100, padding: '8px 16px', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(251,191,36,0.4)', color: '#fbbf24', fontFamily: "'Cinzel', serif", fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}>SKIP →</button>
+        <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, height: '3px', background: 'rgba(0,0,0,0.3)', zIndex: 100 }}><div style={{ height: '100%', width: `${crawlProgress}%`, background: 'linear-gradient(90deg, #fbbf24, #fff, #fbbf24)' }} /></div>
+      </div>
+    );
   }
 
   if (phase === 'end') {
@@ -100,7 +236,8 @@ export default function NDGAutoDeckMobile() {
 
   const sl = slides[currentSlide];
   const c = sl?.content || {};
-  const cont = { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', width: '100%', maxWidth: '100%', padding: L.pad, gap: SP.tight };
+  // V23: flex-start for top alignment, overflowY for long content
+  const cont = { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', textAlign: 'center', width: '100%', maxWidth: '100%', padding: L.pad, gap: SP.tight, overflowY: 'auto', paddingTop: '1rem' };
 
   const render = () => {
     switch (c.type) {
@@ -114,7 +251,7 @@ export default function NDGAutoDeckMobile() {
       case 'ai-wisdom': return (<div style={cont}><p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: F.body }}><RTW text={c.line1} idx={0} total={6} /></p><h2 style={{ fontSize: F.keyEmphasis, fontWeight: 800, marginBottom: SP.el }}><RT text={c.line2} idx={1} total={6} style={{ fontSize: F.keyEmphasis, fontWeight: 800 }} isKeyEmphasis={true} /></h2><h3 style={{ fontSize: F.slide, fontWeight: 800 }}><RT text={c.equation.result} idx={3} total={6} style={{ fontSize: F.slide, fontWeight: 800 }} /></h3><p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: F.bodyS, marginTop: SP.el }}><RTW text={c.urgency} idx={4} total={6} /></p><p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: F.body, fontWeight: 600, color: colors.orange }}><RT text={c.warning} idx={5} total={6} brightColor={colors.orange} dimColor={colors.orangeDim} /></p></div>);
       case 'scripture': return (<div style={cont}><p style={{ fontSize: F.pre }}><RTW text={c.pretitle} idx={0} total={4} brightColor={colors.blueLight} dimColor={colors.blueDim} /></p><h2 style={{ fontSize: F.slide, fontWeight: 800 }}><RT text={c.title} idx={1} total={4} style={{ fontSize: F.slide, fontWeight: 800 }} isKeyEmphasis={true} /></h2><blockquote style={S.scripture}><RTW text={c.quote} idx={2} total={4} /></blockquote><p style={{ fontSize: F.attr }}><RTW text={c.attribution} idx={3} total={4} brightColor={colors.blueLight} dimColor={colors.blueDim} /></p></div>);
       case 'warriors-armor': { const t = 6 + c.armorItems.length; let idx = 0; return (<div style={cont}><img src={images.stMichael} alt="" className="static-image" style={{ height: L.imgLarge, objectFit: 'contain', marginBottom: SP.el }} /><h2 style={{ fontSize: F.svc, fontWeight: 800 }}><RT text={c.title} idx={idx++} total={t} style={{ fontSize: F.svc, fontWeight: 800 }} isKeyEmphasis={true} /></h2><p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: F.bodyS, fontStyle: 'italic' }}><RTW text={c.subtitle} idx={idx++} total={t} /></p><div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: SP.box, width: '100%', marginTop: SP.tight }}>{c.armorItems.map((item, i) => <PB key={i} style={{ ...S.svcBox, padding: '0.4rem', fontSize: F.bodyS }} idx={idx + i} total={t}>{item}</PB>)}</div><p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: F.bodyS, fontWeight: 600, marginTop: SP.el }}><RT text={c.dharmaLink} idx={idx + c.armorItems.length} total={t} isKeyEmphasis={true} /></p><p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: F.body, fontWeight: 700 }}><RTW text={c.conclusion} idx={idx + c.armorItems.length + 1} total={t} /></p></div>); }
-      case 'credentials': { const logos = logoSets[logoSetIndex]; return (<div style={cont}><p style={{ fontSize: F.pre }}><RTW text={c.pretitle} idx={0} total={4} brightColor={colors.blueLight} dimColor={colors.blueDim} /></p><h2 style={{ fontSize: F.slide, fontWeight: 800 }}><RT text={c.title} idx={1} total={4} style={{ fontSize: F.slide, fontWeight: 800 }} /></h2><p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: F.bodyS }}><RTW text={c.credentialsIntro} idx={2} total={4} /></p><p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: F.ndg, fontWeight: 600, fontStyle: 'italic', marginBottom: SP.el }}><RT text={c.credentialsSub} idx={3} total={4} isKeyEmphasis={true} /></p><div style={{ display: 'grid', gridTemplateColumns: `repeat(${L.logoCols}, 1fr)`, gap: '0.5rem', padding: '0.7rem', background: 'rgba(0,0,0,0.35)', borderRadius: '6px', width: '100%', opacity: logoFadeIn ? 1 : 0, transition: 'opacity 0.3s ease' }}>{logos.map((lg, i) => (<div key={i} className="logo-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.5rem', background: 'rgba(255,255,255,0.95)', borderRadius: '4px', height: L.logoH }}><img src={`/images/logos/${lg}`} alt="" style={{ maxWidth: '90%', maxHeight: '40px', objectFit: 'contain' }} /></div>))}</div></div>); }
+      case 'credentials': { const logos = logoSets[logoSetIndex]; return (<div style={cont}><p style={{ fontSize: F.pre }}><RTW text={c.pretitle} idx={0} total={4} brightColor={colors.blueLight} dimColor={colors.blueDim} /></p><h2 style={{ fontSize: F.slide, fontWeight: 800 }}><RT text={c.title} idx={1} total={4} style={{ fontSize: F.slide, fontWeight: 800 }} /></h2><p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: F.bodyS }}><RTW text={c.credentialsIntro} idx={2} total={4} /></p><p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: F.ndg, fontWeight: 600, fontStyle: 'italic', marginBottom: SP.el }}><RT text={c.credentialsSub} idx={3} total={4} isKeyEmphasis={true} /></p><div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0.6rem', padding: '0.7rem', background: 'rgba(0,0,0,0.35)', borderRadius: '6px', width: '100%', opacity: logoFadeIn ? 1 : 0, transition: 'opacity 0.3s ease' }}>{logos.map((lg, i) => (<div key={i} className="logo-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.4rem', background: 'rgba(255,255,255,0.95)', borderRadius: '4px', height: L.logoH, minWidth: '45%', maxWidth: '48%' }}><img src={`/images/logos/${lg}`} alt="" style={{ maxWidth: '90%', maxHeight: '45px', objectFit: 'contain' }} /></div>))}</div></div>); }
       case 'service': { const hasH = !!c.sectionTitle; const t = (hasH ? 4 : 3) + c.items.length; let x = 0; return (<div style={cont}>{hasH && (<><h2 style={{ fontSize: F.slide, fontWeight: 800 }}><RT text={c.sectionTitle} idx={x++} total={t} style={{ fontSize: F.slide, fontWeight: 800 }} /></h2><div style={{ width: '40px', height: '2px', background: colors.gold, marginBottom: SP.el }} /></>)}<h3 style={{ fontSize: F.svc, fontWeight: 800 }}><RT text={c.title} idx={x++} total={t} style={{ fontSize: F.svc, fontWeight: 800 }} /></h3><p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: F.bodyS }}><RTW text={c.description} idx={x++} total={t} /></p><div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: SP.box, width: '100%', marginTop: SP.tight }}>{c.items.map((it, i) => <PB key={i} style={{ ...S.svcBox, fontSize: F.bodyS }} idx={x+i} total={t}>{it}</PB>)}</div>{c.wisdomTiein && (<p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: F.bodyS, fontWeight: 600, color: colors.gold, marginTop: SP.el }}><RT text={c.wisdomTiein} idx={x + c.items.length} total={t} /></p>)}</div>); }
       case 'service-dd': { const t = 3 + c.items.length; return (<div style={cont}><img src={images.socratesWriting} alt="" className="floating-image" style={{ height: L.imgSmall, objectFit: 'contain', marginBottom: SP.el }} /><h3 style={{ fontSize: F.svc, fontWeight: 800 }}><RT text={c.title} idx={0} total={t} style={{ fontSize: F.svc, fontWeight: 800 }} /></h3><p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: F.bodyS }}><RTW text={c.description} idx={1} total={t} /></p><div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: SP.box, width: '100%', marginTop: SP.tight }}>{c.items.map((it, i) => <PB key={i} style={{ ...S.svcBox, fontSize: F.bodyS }} idx={2+i} total={t}>{it}</PB>)}</div></div>); }
       case 'services-summary': { const t = 1 + c.items.length; return (<div style={cont}><img src={images.socratesSeated} alt="" className="floating-image" style={{ height: L.imgSeated, objectFit: 'contain', marginBottom: SP.el }} /><h2 style={{ fontSize: F.slide, fontWeight: 800 }}><RT text={c.title} idx={0} total={t} style={{ fontSize: F.slide, fontWeight: 800 }} /></h2><div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: SP.box, width: '100%' }}>{c.items.map((it, i) => <PB key={i} style={{ ...S.svcBox, fontSize: F.bodyS }} idx={1+i} total={t}>{it}</PB>)}</div></div>); }

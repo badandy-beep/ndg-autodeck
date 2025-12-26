@@ -1,8 +1,8 @@
 /* © 2025 Noetic Dharma Group, LLC | www.noeticdharma.com | CONFIDENTIAL & PROPRIETARY | Unauthorized use prohibited */
-/* NDG AutoDeck V22 - DESKTOP */
-/* V22: Consolidated 22 slides, enhanced karaoke (opacity+scale+pulse), bigger images */
+/* NDG AutoDeck V23 - DESKTOP - Optimizations per analysis */
+/* V23: Enhanced karaoke, dynamic height crawl, bigger images, improved aesthetics */
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { images, logoSets, colors, crawlContent, timing, buildSlides, baseAnimations, imageClasses } from '../shared/content';
 
 export default function NDGAutoDeckDesktop() {
@@ -15,27 +15,28 @@ export default function NDGAutoDeckDesktop() {
   const [logoSetIndex, setLogoSetIndex] = useState(0);
   const [logoFadeIn, setLogoFadeIn] = useState(true);
   const [controlsActive, setControlsActive] = useState(false);
+  const crawlRef = useRef(null);  // V23: Ref for dynamic height calculation
 
   const slides = useMemo(() => buildSlides(), []);
 
-  // V22: LAYOUT - BIGGER IMAGES
+  // V23: LAYOUT - BIGGER IMAGES
   const L = {
     footerH: '50px',
     topM: '15px',
     botM: '10px',
     maxW: '1400px',
     pad: '0 3rem',
-    imgHero: '400px',
-    imgLarge: '450px',
-    imgMedium: '380px',
-    imgSmall: '300px',
-    imgSeated: '280px',
+    imgHero: '450px',     // V23: Increased
+    imgLarge: '500px',    // V23: Increased
+    imgMedium: '420px',   // V23: Increased
+    imgSmall: '340px',    // V23: Increased
+    imgSeated: '320px',   // V23: Increased
     logoH: '80px',
     logoCols: 3,
     logoMaxW: '800px',
   };
 
-  // V22: Enhanced fonts
+  // V23: Enhanced fonts with larger crawl sizes
   const F = {
     hero: 'clamp(5rem, 10vw, 7rem)',
     heroSub: '2rem',
@@ -52,24 +53,27 @@ export default function NDGAutoDeckDesktop() {
     box: '1.25rem',
     ndg: 'clamp(1.5rem, 2.8vw, 1.9rem)',
     frost: 'clamp(3.5rem, 7vw, 5rem)',
+    crawlH: '3rem',       // V23: Crawl header size
+    crawlP: '2rem',       // V23: Crawl paragraph size
+    crawlLarge: '2.5rem', // V23: Crawl large text
   };
 
   const SP = { sec: '1rem', el: '0.7rem', box: '0.6rem', tight: '0.4rem' };
 
-  // V22: STYLES - ZERO textShadow
+  // V23: STYLES - Added subtle shadows for depth
   const S = {
-    mainT: { fontSize: F.main, fontWeight: 800, letterSpacing: '0.06em', color: colors.gold, textShadow: 'none' },
-    slideT: { fontSize: F.slide, fontWeight: 800, letterSpacing: '0.05em', color: colors.gold, textShadow: 'none' },
-    svcT: { fontSize: F.svc, fontWeight: 800, letterSpacing: '0.04em', color: colors.gold, textShadow: 'none' },
-    pre: { fontSize: F.pre, fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase', color: colors.blueLight, textShadow: 'none' },
-    body: { fontFamily: "'Cormorant Garamond', serif", fontSize: F.body, lineHeight: 1.6, color: colors.white, textShadow: 'none' },
-    bodyL: { fontFamily: "'Cormorant Garamond', serif", fontSize: F.bodyL, lineHeight: 1.6, color: colors.white, textShadow: 'none' },
-    bodyS: { fontFamily: "'Cormorant Garamond', serif", fontSize: F.bodyS, lineHeight: 1.6, color: colors.white, textShadow: 'none' },
-    quote: { fontFamily: "'Cormorant Garamond', serif", fontSize: F.quote, fontStyle: 'italic', color: colors.gold, textShadow: 'none' },
-    scripture: { fontFamily: "'Cormorant Garamond', serif", fontSize: F.body, fontStyle: 'italic', lineHeight: 1.7, color: colors.white, padding: '1rem 1.5rem', background: 'rgba(255,255,255,0.04)', borderRadius: '4px', textShadow: 'none' },
-    attr: { fontSize: F.attr, fontWeight: 700, letterSpacing: '0.12em', color: colors.blueLight, textShadow: 'none' },
-    ndg: { fontFamily: "'Cormorant Garamond', serif", fontSize: F.ndg, fontWeight: 600, fontStyle: 'italic', color: colors.gold, textShadow: 'none' },
-    svcBox: { padding: '0.8rem 1rem', background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.35)', borderRadius: '4px', color: colors.gold, fontSize: F.box, fontWeight: 600, textAlign: 'center', textShadow: 'none' },
+    mainT: { fontSize: F.main, fontWeight: 800, letterSpacing: '0.06em', color: colors.gold, textShadow: '0 2px 4px rgba(0,0,0,0.3)' },
+    slideT: { fontSize: F.slide, fontWeight: 800, letterSpacing: '0.05em', color: colors.gold, textShadow: '0 2px 4px rgba(0,0,0,0.3)' },
+    svcT: { fontSize: F.svc, fontWeight: 800, letterSpacing: '0.04em', color: colors.gold, textShadow: '0 2px 4px rgba(0,0,0,0.3)' },
+    pre: { fontSize: F.pre, fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase', color: colors.blueLight, textShadow: '0 1px 2px rgba(0,0,0,0.2)' },
+    body: { fontFamily: "'Cormorant Garamond', serif", fontSize: F.body, lineHeight: 1.6, color: colors.white, textShadow: '0 1px 2px rgba(0,0,0,0.2)' },
+    bodyL: { fontFamily: "'Cormorant Garamond', serif", fontSize: F.bodyL, lineHeight: 1.6, color: colors.white, textShadow: '0 1px 2px rgba(0,0,0,0.2)' },
+    bodyS: { fontFamily: "'Cormorant Garamond', serif", fontSize: F.bodyS, lineHeight: 1.6, color: colors.white, textShadow: '0 1px 2px rgba(0,0,0,0.2)' },
+    quote: { fontFamily: "'Cormorant Garamond', serif", fontSize: F.quote, fontStyle: 'italic', color: colors.gold, textShadow: '0 2px 4px rgba(0,0,0,0.3)' },
+    scripture: { fontFamily: "'Cormorant Garamond', serif", fontSize: F.body, fontStyle: 'italic', lineHeight: 1.7, color: colors.white, padding: '1rem 1.5rem', background: 'rgba(255,255,255,0.04)', borderRadius: '4px', textShadow: '0 1px 2px rgba(0,0,0,0.2)' },
+    attr: { fontSize: F.attr, fontWeight: 700, letterSpacing: '0.12em', color: colors.blueLight, textShadow: '0 1px 2px rgba(0,0,0,0.2)' },
+    ndg: { fontFamily: "'Cormorant Garamond', serif", fontSize: F.ndg, fontWeight: 600, fontStyle: 'italic', color: colors.gold, textShadow: '0 2px 4px rgba(0,0,0,0.3)' },
+    svcBox: { padding: '0.8rem 1rem', background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.35)', borderRadius: '4px', color: colors.gold, fontSize: F.box, fontWeight: 600, textAlign: 'center', textShadow: '0 1px 2px rgba(0,0,0,0.2)' },
   };
 
   // V22: ENHANCED KARAOKE - Opacity + Scale + Pulse
@@ -134,20 +138,32 @@ export default function NDGAutoDeckDesktop() {
     return () => clearInterval(t);
   }, [phase, currentSlide, slides]);
 
+  // V23: Enhanced crawl with dynamic height calculation
   useEffect(() => {
     if (phase !== 'crawl') return;
-    // V22.1: Dual timers - scroll progress + word highlight
+    
+    // V23: Dynamic height-based scroll progress
     const scrollInterval = setInterval(() => {
       setCrawlProgress(p => {
+        const contentHeight = crawlRef.current?.getBoundingClientRect().height || 0;
+        const viewportHeight = window.innerHeight;
+        const maxProgress = contentHeight > 0 ? (contentHeight / viewportHeight) * 100 + 100 : crawlContent.transitionAt;
+        
         const next = p + crawlContent.speed;
-        if (next >= crawlContent.transitionAt) { clearInterval(scrollInterval); setTimeout(() => setPhase('deck'), 300); return crawlContent.transitionAt; }
+        if (next >= maxProgress) {
+          clearInterval(scrollInterval);
+          setTimeout(() => setPhase('deck'), 500); // V23: Minimal pause before advancing
+          return maxProgress;
+        }
         return next;
       });
     }, 100);
-    // Word-by-word flashlight - ~200 WPM = 300ms per word
+    
+    // Word-by-word flashlight - adjusted for reading pace
     const wordInterval = setInterval(() => {
       setCrawlWordIndex(w => w + 1);
-    }, 300);
+    }, (60000 / crawlContent.karaokeWPM));
+    
     return () => { clearInterval(scrollInterval); clearInterval(wordInterval); };
   }, [phase]);
 
@@ -198,7 +214,8 @@ export default function NDGAutoDeckDesktop() {
   // CRAWL with Flashlight Karaoke
   if (phase === 'crawl') {
     const crawlTop = 100 - (crawlProgress * 3);
-    const crawlCss = `.crawl-wrap{position:fixed;inset:0;overflow:hidden}.crawl-wrap::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(5,18,36,1) 0%,rgba(5,18,36,0.7) 8%,rgba(5,18,36,0.3) 15%,transparent 25%,transparent 70%,rgba(5,18,36,0.2) 85%,rgba(5,18,36,0.6) 100%);pointer-events:none;z-index:10}.crawl-content{position:absolute;left:50%;transform:translateX(-50%);width:78%;max-width:950px;text-align:center}.crawl-h{font-family:'Cinzel',serif;font-size:2.6rem;color:#fbbf24;font-weight:700;letter-spacing:0.08em;margin-bottom:1.8rem}.crawl-p{font-family:'Cinzel',serif;font-size:1.7rem;font-weight:500;line-height:1.5;margin-bottom:1.2rem;letter-spacing:0.02em}.crawl-large{font-size:2.1rem;font-weight:700;margin-bottom:1.5rem}.crawl-italic{font-style:italic}.crawl-word{transition:all 0.15s ease;display:inline}.crawl-word-dim{color:rgba(139,105,20,0.6)}.crawl-word-lit{color:#ffffff;text-shadow:0 0 8px rgba(255,255,255,0.4)}.crawl-word-past{color:#fbbf24}`;
+    // V23: Enhanced crawl CSS with larger fonts
+    const crawlCss = `.crawl-wrap{position:fixed;inset:0;overflow:hidden}.crawl-wrap::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(5,18,36,1) 0%,rgba(5,18,36,0.7) 8%,rgba(5,18,36,0.3) 15%,transparent 25%,transparent 70%,rgba(5,18,36,0.2) 85%,rgba(5,18,36,0.6) 100%);pointer-events:none;z-index:10}.crawl-content{position:absolute;left:50%;transform:translateX(-50%);width:78%;max-width:950px;text-align:center}.crawl-h{font-family:'Cinzel',serif;font-size:3rem;color:#ffd700;font-weight:700;letter-spacing:0.08em;margin-bottom:1.8rem}.crawl-p{font-family:'Cinzel',serif;font-size:2rem;font-weight:500;line-height:1.5;margin-bottom:1.2rem;letter-spacing:0.02em}.crawl-large{font-size:2.5rem;font-weight:700;margin-bottom:1.5rem}.crawl-italic{font-style:italic}.crawl-word{transition:all 0.15s ease;display:inline}.crawl-word-dim{color:rgba(139,105,20,0.6)}.crawl-word-lit{color:#ffffff;text-shadow:0 0 8px rgba(255,255,255,0.4)}.crawl-word-past{color:#ffd700}`;
     
     // Build all words with their paragraph context
     let globalWordIndex = 0;
@@ -240,7 +257,7 @@ export default function NDGAutoDeckDesktop() {
         <style>{css + crawlCss}</style>
         <BG />
         <div className="crawl-wrap">
-          <div className="crawl-content" style={{ top: `${crawlTop}%` }}>
+          <div ref={crawlRef} className="crawl-content" style={{ top: `${crawlTop}%` }}>
             <p className="crawl-h">{crawlContent.header}</p>
             {crawlContent.paragraphs.map((p, i) => renderParagraph(p, i))}
             <p className="crawl-h" style={{ marginTop: '1.8rem' }}>{crawlContent.footer}</p>
@@ -455,8 +472,8 @@ export default function NDGAutoDeckDesktop() {
             <h2 style={{ fontSize: F.slide, fontWeight: 800, letterSpacing: '0.05em' }}><RT text={c.title} idx={1} total={4} style={{ fontSize: F.slide, fontWeight: 800 }} /></h2>
             <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: F.body, marginBottom: SP.tight, maxWidth: '900px' }}><RTW text={c.credentialsIntro} idx={2} total={4} /></p>
             <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: F.ndg, fontWeight: 600, fontStyle: 'italic', marginBottom: SP.el }}><RT text={c.credentialsSub} idx={3} total={4} style={{ fontSize: F.ndg, fontWeight: 600, fontStyle: 'italic' }} isKeyEmphasis={true} /></p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', padding: '1.2rem', background: 'rgba(0,0,0,0.4)', borderRadius: '10px', width: '100%', maxWidth: '950px', opacity: logoFadeIn ? 1 : 0, transition: 'opacity 0.3s ease' }}>
-              {logos.map((lg, i) => (<div key={i} className="logo-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', background: 'rgba(255,255,255,0.98)', borderRadius: '6px', height: '100px' }}><img src={`/images/logos/${lg}`} alt="" style={{ maxWidth: '90%', maxHeight: '70px', objectFit: 'contain' }} /></div>))}
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1rem', padding: '1.2rem', background: 'rgba(0,0,0,0.4)', borderRadius: '10px', width: '100%', maxWidth: '950px', opacity: logoFadeIn ? 1 : 0, transition: 'opacity 0.3s ease' }}>
+              {logos.map((lg, i) => (<div key={i} className="logo-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.5rem', background: 'rgba(255,255,255,0.98)', borderRadius: '6px', height: '80px', minWidth: '30%', maxWidth: '31%' }}><img src={`/images/logos/${lg}`} alt="" style={{ maxWidth: '90%', maxHeight: '60px', objectFit: 'contain' }} /></div>))}
             </div>
             <div style={{ display: 'flex', gap: '0.4rem', marginTop: SP.el }}>{logoSets.map((_, i) => <div key={i} style={{ width: i === logoSetIndex ? '16px' : '6px', height: '6px', borderRadius: '3px', background: i === logoSetIndex ? colors.gold : 'rgba(255,255,255,0.25)', transition: 'all 0.3s ease' }} />)}</div>
           </div>

@@ -1,6 +1,6 @@
 /* © 2025 Noetic Dharma Group, LLC | www.noeticdharma.com | CONFIDENTIAL & PROPRIETARY | Unauthorized use prohibited */
-/* NDG AutoDeck V22 - SHARED CONTENT */
-/* V22: Consolidated 22 slides, enhanced karaoke, full mobile support */
+/* NDG AutoDeck V23 - SHARED CONTENT */
+/* V23: Optimizations - larger fonts, dynamic crawl, enhanced aesthetics */
 
 export const images = {
   background: '/images/1279.jpg',
@@ -23,12 +23,12 @@ export const logoSets = [
   ['denham-capital.png', 'usc-marshall.png', 'lockheed-martin.png', 'mckinsey.png', 'darpa.png', 'llnl.png']
 ];
 
-// V22: Clean colors - NO textShadow blur
+// V23: Enhanced colors - brighter gold for maximum impact
 export const colors = {
-  gold: '#fbbf24',
-  goldDim: '#8b6914',       // Dimmer for better contrast on reveal
+  gold: '#ffd700',        // V23: Brighter gold for emphasis
+  goldDim: '#8b6914',     // Dimmer for better contrast on reveal
   white: '#ffffff',
-  whiteDim: '#6b7280',      // Dimmer for better contrast
+  whiteDim: '#6b7280',    // Dimmer for better contrast
   red: '#ef4444',
   redDim: '#991b1b',
   orange: '#f59e0b',
@@ -55,9 +55,9 @@ export const crawlContent = {
     { text: 'This is their story...', style: 'white-italic' },
   ],
   footer: '★ ★ ★ ★',
-  speed: 0.22,           // Slightly faster scroll
-  transitionAt: 95,      // Transition earlier to avoid blank screen
-  karaokeWPM: 200,       // Reading pace for flashlight effect
+  speed: 0.18,           // V23: Slower for reading pace
+  transitionAt: 100,     // V23: Full completion before transition
+  karaokeWPM: 180,       // V23: Normal reading pace (words per minute)
 };
 
 // V22: Enhanced timing for karaoke
